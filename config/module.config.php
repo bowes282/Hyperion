@@ -16,7 +16,21 @@ return array(
             ),
             'Hyperion\Controller\ControllerAbstract' => array(
                 'parameters' => array(
-                    'ApiConfig' => include __DIR__ . '/api.config.php',
+                    'ApiConfig' => array(
+                        'User' => 'enteryourusername',
+                        'Key' => 'enteryourkeyhere',
+                        'CustomerId' => 'enteryourcustomeridhere',
+                    
+                        'Auth' =>array( 
+                            'Url' =>  'https://lon.identity.api.rackspacecloud.com',
+                            'Ver' => 'v1.1',
+                        ),
+                    
+                        'Dns' =>array(
+                            'Url' => 'https://lon.dns.api.rackspacecloud.com',
+                            'Ver' => 'v1.0',
+                        ),   
+                    ),
                 ),
             ),
         
