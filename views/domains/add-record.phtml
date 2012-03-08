@@ -1,0 +1,13 @@
+<ul class="breadcrumb">
+    <li>
+        <a href="<?=$this->url('hyperion', array('controller'=>'domains', 'action' => null));?>">Domains</a> <span class="divider">/</span>
+    </li>
+    <li>
+        <a href="<?=$this->url('hyperion/query', array('controller'=>'domains', 'action' => 'detail', 'id' => $domainId));?>">Detail</a> <span class="divider">/</span>
+    </li>
+    <li class="active">
+        Add Record
+    </li>
+</ul>
+
+<?=$form?>

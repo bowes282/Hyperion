@@ -1,0 +1,31 @@
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2 tabbable tabs-left">
+            <ul class="nav nav-tabs" style="width:100%" >
+                <li>
+                    <a href="<?=$this->url('hyperion', array('controller' => null))?>">
+                        <i class="icon-home"></i>
+                        Home
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="<?=$this->url('hyperion', array('controller' => 'domains'))?>">
+                        <i class="icon-th"></i>
+                        DNS
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="span10">
+        <?php if (isset($messages) && count($messages)) { ?>
+            <div class="alert">
+                <a class="close" data-dismiss="alert">×</a>
+                <?=$this->htmlList($messages);?>
+            </div>
+        <?php } ?>
+            
+            <?=$this->content?>
+            
+        </div>
+    </div>
+</div>

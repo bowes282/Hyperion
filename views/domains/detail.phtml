@@ -1,0 +1,57 @@
+<ul class="breadcrumb">
+    <li>
+        <a href="<?=$this->url('hyperion', array('controller'=>'domains', 'action' => null));?>">Domains</a> <span class="divider">/</span>
+    </li>
+    <li class="active">
+        Details
+    </li>
+</ul>
+
+<h1><?=$domain->name?></h1>
+<table class="table">
+    <thead>
+       <tr><th>Email Address</th><th>Nameservers</th></tr>
+    </thead>
+    <tbody>
+       <tr>
+           <td><?=$domain->emailAddress?></td>
+           <td>
+               <ul>
+               <?php foreach($domain->nameservers AS $ns) { ?>
+                   <li><?=$ns->name?></li>
+               <?php } ?>
+               </ul>
+           </td>
+       </tr>
+    </tbody>
+</table>
+
+<table class="table table-striped">
+    <caption>Records</caption>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Data</th>
+            <th>TTL</th>
+            <th>
+                <a href="<?=$this->url('hyperion/query', array('controller' => 'domains', 'action' => 'add-record', 'domain' => $domain->id))?>"><i class="icon-plus-sign"></i>Add</a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($domain->recordsList->records AS $record) { ?>
+            <tr>
+                <td><?=$record->name?></td>
+                <td><?=$record->type?></td>
+                <td><?=$record->data?></td>
+                <td><?=$record->ttl?></td>
+                <td>
+                    <a href="<?=$this->url('hyperion/query', array('controller' => 'domains', 'action' => 'edit-record', 'domain' => $domain->id, 'record'=> $record->id))?>"><i class="icon-pencil"></i>Edit</a>
+                    &nbsp;<a href="<?=$this->url('hyperion/query', array('controller' => 'domains', 'action' => 'delete-record', 'domain' => $domain->id, 'record'=> $record->id))?>"><i class="icon-trash"></i>Delete</a>
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
+    <tfoot><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tfoot>
+</table>
