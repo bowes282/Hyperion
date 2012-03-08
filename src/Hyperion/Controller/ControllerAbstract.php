@@ -40,10 +40,13 @@ class ControllerAbstract extends ActionController
         
     }
     
-    protected function loadView($viewScript, $variables)
+    protected function loadView($viewScript, $variables, $section = 'home')
     {
         
-        $layout = new ViewModel(array('messages' => $this->messages));
+        $layout = new ViewModel(array(
+            'messages' => $this->messages,
+            'section' => $section,
+        ));
         $layout->setTemplate('hyperion/layout');
         $view = new ViewModel($variables);
         $view->setTemplate($viewScript);

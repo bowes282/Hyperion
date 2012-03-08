@@ -22,7 +22,7 @@ class DomainsController extends ControllerAbstract
 
         return $this->loadView('domains/index', array(
             'domains' => $data->domains,
-        ));
+        ),'dns');
     }
     
     public function detailAction()
@@ -48,7 +48,7 @@ class DomainsController extends ControllerAbstract
         
         return $this->loadView('domains/detail', array(
             'domain' => $data,
-        ));
+        ),'dns');
     }
     
     public function addRecordAction()
@@ -90,7 +90,7 @@ class DomainsController extends ControllerAbstract
         return $this->loadView('domains/add-record', array(
             'domainId' => $domain,
             'form' => $form,
-        ));
+        ),'dns');
     }
     
     public function editRecordAction()
@@ -144,7 +144,7 @@ class DomainsController extends ControllerAbstract
         return $this->loadView('domains/edit-record', array(
             'domainId' => $domain,
             'form' => $form,
-        ));
+        ),'dns');
     }
     
     public function deleteRecordAction()
@@ -184,7 +184,7 @@ class DomainsController extends ControllerAbstract
         
         return $this->loadView('domains/delete-record', array(
             'record' => json_decode($response->getBody()),
-        ));
+        ),'dns');
     }
     
     

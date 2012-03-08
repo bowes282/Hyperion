@@ -2,13 +2,13 @@
     <div class="row-fluid">
         <div class="span2 tabbable tabs-left">
             <ul class="nav nav-tabs" style="width:100%" >
-                <li>
+                <li<?=($section == 'home')? ' class="active"': null;?>>
                     <a href="<?=$this->url('hyperion', array('controller' => null))?>">
                         <i class="icon-home"></i>
                         Home
                     </a>
                 </li>
-                <li class="active">
+                <li<?=($section == 'dns')? ' class="active"': null;?>>
                     <a href="<?=$this->url('hyperion', array('controller' => 'domains'))?>">
                         <i class="icon-th"></i>
                         DNS
