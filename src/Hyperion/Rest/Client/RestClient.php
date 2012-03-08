@@ -71,6 +71,13 @@ class RestClient extends ZendRestClient
         if ($this->format) {
             $headers['Content-Type'] = 'application/' . $this->format;
             $headers['Accept'] = 'application/' . $this->format;
+            if ($this->body) {
+                switch ($this->format) {
+                    case 'json':
+                        $client->setRawBody($this->body);
+                        break;
+                }
+            }
         }
         
         $client->setHeaders($headers);
@@ -122,7 +129,6 @@ class RestClient extends ZendRestClient
             $request->post()->fromArray((array) $data);
         }
     
-        
         $this->setHeaders($client);
         
         return $client->send($request);

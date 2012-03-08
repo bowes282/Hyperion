@@ -6,6 +6,7 @@ use Zend\Mvc\Controller\ActionController,
     Zend\View\Model\ViewModel,
     Hyperion\Rest\Client\RestClient,
     Hyperion\Controller\ControllerAbstract,
+    Hyperion\Form\DomainForm,
     Hyperion\Form\DomainRecordForm;
 
 class DomainsController extends ControllerAbstract
@@ -25,6 +26,33 @@ class DomainsController extends ControllerAbstract
         ),'dns');
     }
     
+    public function jobsAction()
+    {
+        $response = $this->request('get', 'status');
+        $data = json_decode($response->getBody());
+
+        \Zend\Debug::dump($data);
+        return $this->loadView('domains/jobs', array(
+            'data' => $data,
+        ),'dns');
+    }
+    
+    public function limitsAction()
+    {
+        $response = $this->request('get', 'limits');
+        $data = json_decode($response->getBody());
+        
+        \Zend\Debug::dump($data);
+        return $this->loadView('domains/limits', array(
+            'data' => $data,
+        ),'dns');
+    }
+    
+    /**
+     * action to display domain details
+     * @throws \RuntimeException
+     * @return \Zend\View\Model\ViewModel
+     */
     public function detailAction()
     {
         $request = $this->getRequest();
@@ -51,6 +79,117 @@ class DomainsController extends ControllerAbstract
         ),'dns');
     }
     
+    /**
+     * create domain
+     */
+    public function createAction()
+    {
+       $request = $this->getRequest();
+        $form = new DomainForm();
+        $form->setLegend('Create Domain');
+        
+        if ($request->isPost()){
+            if ($form->isValid($request->post()->toArray())) {
+                $response = $this->request(
+                    'post', 
+                    'domains',
+                    array('domains' => array(
+                        $form->getValues()
+                    ))
+                );
+                
+            }
+        }
+        
+        return $this->loadView('domains/create', array(
+            'form' => $form,
+        ),'dns');
+    }
+    
+    /**
+     * edit domain
+     * @throws \RuntimeException
+     */
+    public function editAction()
+    {
+        $request = $this->getRequest();
+       
+        if (!$domain = $request->query()->get('id', false)) {
+            throw new \RuntimeException('Domain ID must be specified');
+        }
+       
+        $form = new DomainForm();
+        $form->setLegend('Edit Domain');
+        $form->removeElement('name');
+        
+        if ($request->isPost()){
+            if ($form->isValid($request->post()->toArray())) {
+                $response = $this->request(
+                    'put', 
+                    'domains/' . $domain,
+                    $form->getValues()
+                );
+                
+            }
+        } else {
+            $response = $this->request(
+                'get',
+                'domains/' . $domain
+            );
+            if ($response->isOk()) {
+                $form->populate((array)json_decode($response->getBody()));
+            }
+            
+        }
+        
+        return $this->loadView('domains/edit', array(
+            'form' => $form,
+        ),'dns');
+    }
+    
+    
+/**
+     * delete domain record
+     * @throws \RuntimeException
+     * @return \Zend\View\Model\ViewModel
+     */
+    public function deleteAction()
+    {
+        $request = $this->getRequest();
+
+        if (!$domain = $request->query()->get('id', false)) {
+            throw new \RuntimeException('Domain ID must be specified');
+        }
+        
+        if ($request->isPost()){
+            $response = $this->request(
+                'delete',
+                'domains/' . $domain
+            );
+            
+        }
+        
+        $response = $this->request(
+            'get',
+            'domains/' . $domain
+        );
+        
+        if (!$response->isOk()) {
+            $this->flashMessenger()->addMessage('Could not load record Data');
+            return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
+        }
+        
+        return $this->loadView('domains/delete', array(
+            'domain' => json_decode($response->getBody()),
+        ),'dns');
+    }
+    
+    
+    
+    /**
+     * Add record to domain
+     * @throws \RuntimeException
+     */
     public function addRecordAction()
     {
         $request = $this->getRequest();
@@ -66,25 +205,15 @@ class DomainsController extends ControllerAbstract
             if ($form->isValid($request->post()->toArray())) {
                 $response = $this->request(
                     'post', 
-                    'domains/' . $domain . '/records',
+                    'domains/' . $domain . '/records/',
                     array('records' => array(
                         $form->getValues()
-                    ))
+                    )),
+                    array('action' => 'detail', 'id' => $domain)
                 );
                 
-                if ($response->isOk()) {
-                    $this->flashMessenger()->addMessage('New Record Added Sucessfully.');
-                    return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
-                } else if ($response->getStatusCode() == 202) {
-                    $this->flashMessenger()->addMessage('New Record Sent to Rackspace for processing');
-                    return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
-                } else {
-                    $data = json_decode($response->getBody());
-                    $this->messages[] = 'An Error Occured';
-                    \Zend\Debug::dump($data);
-                }
             }
-        }
+        } 
         
         
         return $this->loadView('domains/add-record', array(
@@ -93,6 +222,10 @@ class DomainsController extends ControllerAbstract
         ),'dns');
     }
     
+    /**
+     * edit domain record
+     * @throws \RuntimeException
+     */
     public function editRecordAction()
     {
         $request = $this->getRequest();
@@ -114,17 +247,6 @@ class DomainsController extends ControllerAbstract
                     $form->getValues()
                 );
                 
-                if ($response->isOk()) {
-                    $this->flashMessenger()->addMessage('New Record Added Sucessfully.');
-                    return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
-                } else if ($response->getStatusCode() == 202) {
-                    $this->flashMessenger()->addMessage('New Record Sent to Rackspace for processing');
-                    return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
-                } else {
-                    $data = json_decode($response->getBody());
-                    $this->messages[] = 'An Error Occured';
-                    \Zend\Debug::dump($data);
-                }
             }
         } else {
             $response = $this->request(
@@ -147,6 +269,11 @@ class DomainsController extends ControllerAbstract
         ),'dns');
     }
     
+    /**
+     * delete domain record
+     * @throws \RuntimeException
+     * @return \Zend\View\Model\ViewModel
+     */
     public function deleteRecordAction()
     {
         $request = $this->getRequest();
@@ -164,11 +291,6 @@ class DomainsController extends ControllerAbstract
                 'delete',
                 'domains/' . $domain . '/records/' . $record
             );
-            
-            if (in_array($response->getStatusCode(), array(200,202,204))) {
-                $this->flashMessenger()->addMessage('Delete request sent to rackspace for processing');
-                return $this->redirect()->toRoute('hyperion/query', array('controller'=>'domains','action'=>'detail','id'=>$domain));
-            }
             
         }
         

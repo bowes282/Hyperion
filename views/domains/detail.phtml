@@ -44,7 +44,7 @@
             <tr>
                 <td><?=$record->name?></td>
                 <td><?=$record->type?></td>
-                <td><?=$record->data?></td>
+                <td><?=$this->truncate($record->data, 30, false, true)?></td>
                 <td><?=$record->ttl?></td>
                 <td>
                     <a href="<?=$this->url('hyperion/query', array('controller' => 'domains', 'action' => 'edit-record', 'domain' => $domain->id, 'record'=> $record->id))?>"><i class="icon-pencil"></i>Edit</a>

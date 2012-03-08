@@ -57,7 +57,7 @@ class ControllerAbstract extends ActionController
     }
     
     
-    protected function request($type, $uri, $params = array())
+    protected function request($type, $uri, $params = array(), $redirectParams = array())
     {
         $this->authenticate();
         
@@ -66,6 +66,7 @@ class ControllerAbstract extends ActionController
         $client->setFormat('json');
         $client->setToken($this->authd->data->token->id);
         
+        $client->setBody(json_encode($params));
         
         $method = 'rest' . ucfirst(strtolower($type));
         
@@ -73,6 +74,21 @@ class ControllerAbstract extends ActionController
             '/' . $this->ApiConfig['Dns']['Ver'] . '/' .$this->ApiConfig['CustomerId'] . '/' . $uri,
             $params
         );
+        
+        if ($type !== 'get') {
+            $redirectTo = array_merge(array('controller'=>'domains','action'=>'index'), $redirectParams);
+            
+            if ($response->isOk()) {
+                $this->messages[] = 'Action Sucessfully Processed';
+            } else if (in_array($response->getStatusCode(), array(202,204))) {
+                $this->flashMessenger()->addMessage('Data Sent to Rackspace for processing');
+                $this->redirect()->toRoute('hyperion/query', $redirectTo);
+            } else {
+                $data = json_decode($response->getBody());
+                $this->messages[] = 'An Error Occured';
+                \Zend\Debug::dump($data);
+            }
+        }
         
         return $response; 
     }
@@ -103,9 +119,17 @@ class ControllerAbstract extends ActionController
         
         $client->setBody(json_encode($data));
         $client->setFormat('json');
-        $response = $client->restPost('/' . $this->ApiConfig['Auth']['Ver'] . '/auth.json', $data);
+        
+        $response = $client->restPost(
+            '/' . $this->ApiConfig['Auth']['Ver'] . '/auth', 
+            $data
+        );
         
         $data = json_decode($response->getBody());
+        if (isset($data->unauthorized)) {
+            unset($this->authd->data);
+            throw new \RuntimeException($data->unauthorized->message, $data->unauthorized->code);
+        }
         $this->authd->data = $data->auth;
         
     }
