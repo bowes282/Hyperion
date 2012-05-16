@@ -35,7 +35,7 @@ return array(
             ),
         
             // Setup the router and routes
-            'Zend\Mvc\Router\RouteStack' => array(
+            'Zend\Mvc\Router\RouteStackInterface' => array(
                 'parameters' => array(
                     'routes' => array(
                         'hyperion' => array(
@@ -54,7 +54,7 @@ return array(
                             'may_terminate' => true,
                             'child_routes'  => array(
                                 'query' => array(
-                                    'type' => 'Zend\Mvc\Router\Http\Query',
+                                    'type' => 'Query',
                                 ),
                             ),
                         ),
